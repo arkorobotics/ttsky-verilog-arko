@@ -16,12 +16,37 @@ module tt_um_arko (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+  wire _unused = &{ena, 1'b0};
 
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+  reg [7:0] input_reg;
+  reg [7:0] output_reg;
+
+  reg [7:0] counter;
+
+  assign uo_out  = output_reg;  
+  assign uio_out = 8'b0;
+  assign uio_oe  = 8'b0;
+
+  always @ (posedge clk)
+    begin
+      if (!rst_n)
+        begin
+          input_reg <= 8'b0;
+          output_reg <= 8'b0;
+          counter <= 8'b0;
+        end
+      else
+        begin
+          input_reg <= ui_in;
+          if (input_reg == output_reg)
+            begin
+              output_reg <= 8'b0;
+            end
+          else
+            begin
+              output_reg <= output_reg + 1'b1;
+            end
+        end
+    end
 
 endmodule
